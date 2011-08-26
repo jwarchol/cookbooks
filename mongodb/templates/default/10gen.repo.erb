@@ -1,0 +1,10 @@
+<%
+processor = node[:kernel][:machine]
+if processor != "x86_64"
+  processor = "i686"
+end
+%>
+[10gen]
+name=10gen Repository
+baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/<%=processor%>
+gpgcheck=0

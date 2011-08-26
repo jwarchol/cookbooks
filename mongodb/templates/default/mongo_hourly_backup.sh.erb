@@ -1,0 +1,32 @@
+#!/bin/bash
+
+BACKUP_DIR="<%= @backup_dir %>"
+DOW=`date "+%u"`
+HOUR=`date "+%H"`
+BACKUP_HOST="<%= @node[:mongodb][:bind_address] %>:<%= @port %>"
+COMPRESS="true"
+
+# Going to set the current backup dir like this
+CUR_DIR=$BACKUP_DIR/$DOW/$HOUR
+
+# We'll keep the log for each backup in the same dir (this gives us automatic rotation)
+LOG=$CUR_DIR/backup.log
+
+# If the current backup dir doesn't exist, we need to create it
+if [ ! -d $CUR_DIR ]
+then
+  mkdir -p $CUR_DIR
+fi
+	
+cd $CUR_DIR
+echo -e "\n\n\n\n---------------Backup Begin--------------" > $LOG
+date >> $LOG
+<%= @node[:mongodb][:binaries] %>/mongodump -h $BACKUP_HOST >> $LOG
+echo -e "---------------Backup End--------------" >> $LOG
+
+if [ $COMPRESS = "true" ]
+then
+  cd $CUR_DIR/..
+  tar -zcvf $HOUR.tgz $HOUR
+  rm -rf $CUR_DIR
+fi

@@ -1,0 +1,3 @@
+if ( "${path}" !~ *<%= @node[:mongodb][:binaries] %>/* ) then
+	set path = ( <%= @node[:mongodb][:binaries] %>/ $path )
+endif

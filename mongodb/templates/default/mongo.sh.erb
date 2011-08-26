@@ -1,0 +1,3 @@
+if ! echo ${PATH} | /bin/grep -q <%= @node[:mongodb][:binaries] %> ; then
+	PATH=<%= @node[:mongodb][:binaries] %>:${PATH}
+fi

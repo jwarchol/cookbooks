@@ -1,0 +1,43 @@
+Bluepill.application("<%= @instance %>", :log_file => "/var/log/bluepill/<%= @instance %>.log") do |app|
+  app.uid = "<%= @node[:mongodb][:user] %>"
+  app.gid = "<%= @node[:mongodb][:group] %>"
+  
+  app.process("<%= @instance %>") do |process|
+    process.group         "mongod"
+    process.working_dir   = "<%= @path %>"
+    process.start_command = "/usr/bin/mongod -f <%= @config %> <%= @options %> --port <%= @ports[:mongod] %>"
+    process.daemonize     = true
+    process.pid_file      = "/tmp/<%= @name %>.pid"
+    
+    process.start_grace_time   = 10.seconds
+    process.stop_grace_time    = 10.seconds
+    process.restart_grace_time = 10.seconds
+  end
+  
+  <% if @run_configsvr %>
+    app.process("<%= @instance %>_config") do |process|
+      process.group         "mongod"
+      process.working_dir   = "<%= @path %>"
+      process.start_command = "/usr/bin/mongod --configsvr --dbpath <%= @path %>_config"
+      process.daemonize     = true
+      process.pid_file      = "/tmp/<%= @instance %>_config.pid"
+      
+      process.start_grace_time   = 10.seconds
+      process.stop_grace_time    = 10.seconds
+      process.restart_grace_time = 10.seconds
+    end
+  <% end %>
+  <% if @shard %> 
+    app.process("<%= @instance %>_shard") do |process|
+      process.group         "mongod"
+      process.working_dir   = "<%= @path %>"
+      process.start_command = "/usr/bin/mongos --configdb=<%= @configsvrs %>"
+      process.daemonize     = true
+      process.pid_file      = "/tmp/<%= @instance %>_shard.pid"
+      
+      process.start_grace_time   = 10.seconds
+      process.stop_grace_time    = 10.seconds
+      process.restart_grace_time = 10.seconds
+    end
+  <% end %>
+end

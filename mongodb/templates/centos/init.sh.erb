@@ -1,0 +1,74 @@
+#!/bin/bash
+#
+#       /etc/rc.d/init.d/mongodb
+#
+# mongodb - this script starts and stops the mongodb daemon
+#
+# chkconfig: 345 70 11
+# description: MongoDB is a non-relational database storage system. 
+# processname: mongodb
+# config: <%= @node[:mongodb][:config_dir] %>/mongodb.conf
+# pidfile: <%= @node[:mongodb][:pid_dir] %>/mongodb.pid
+
+# Source function library.
+. /etc/init.d/functions
+
+RETVAL=0
+exec=<%= @node[:mongodb][:binaries] %>/mongod
+prog=mongod
+config=<%= @configuration_file %>
+pidfile=<%= @node[:mongodb][:data_dir] %>/<%= @mongod %>/mongod.lock
+lockfile=/var/lock/mongod_<%= @mongod %>
+MONGO_USER=<%= @node[:mongodb][:user] %>
+MONGO_GROUP=<%= @node[:mongodb][:group] %>
+
+# [ -e $config ] && . $config
+
+start() {
+  if [ ! -x $exec ]
+  then
+	echo \$exec not found
+    exit 5
+  fi
+
+  echo -n $"Starting $prog: "
+
+  daemon --user "$MONGO_USER" $exec --fork --logappend -f $config --journal
+  RETVAL=$?
+  echo
+  [ $RETVAL = 0 ] && touch ${lockfile}
+  return $RETVAL
+
+}
+
+stop() {
+  echo -n $"Stopping $prog: "
+  killproc -p $pidfile $prog 
+  RETVAL=$?
+  echo
+  [ $RETVAL = 0 ] && rm -f $lockfile $pidfile
+}
+
+restart() {
+  stop
+  sleep 1
+  start
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    restart
+    ;;
+  *)
+    echo $"Usage: `basename $0` {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit $RETVAL
