@@ -9,8 +9,10 @@
 default[:mongodb][:user]  = "mongodb"
 default[:mongodb][:group] = "mongodb"
 
-default[:mongodb][:bind_address] = "127.0.0.1"
-default[:mongodb][:port]         = "27017"
+default[:mongodb][:bind_address]    = "127.0.0.1"
+default[:mongodb][:port]            = "27017"
+default[:mongodb][:mongos_port]     = "27017"
+default[:mongodb][:configsvr_port]  = "27019"
 
 default[:mongodb][:version]         = '1.8.3'
 default[:mongodb][:package_version] = "#{mongodb[:version]}-mongodb"

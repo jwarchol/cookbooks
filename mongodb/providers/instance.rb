@@ -16,7 +16,7 @@ action :create do
   directories = %W(#{node[:mongodb][:log_dir]}/#{new_resource.name}
                    #{node[:mongodb][:data_dir]}/#{new_resource.name})
   
-  directories << "#{node[:mongodb][:data_dir]}/#{new_resource.name}_config" if new_resource.sharded
+  directories << "#{node[:mongodb][:data_dir]}/#{new_resource.name}_config" if new_resource.config_server
   
   directories.each do |dir|
     directory dir do
@@ -30,8 +30,8 @@ action :create do
   end
   
   # Figure out configuration options
-  ports = {:mongod => node[:mongodb][:port]}
-  ports.merge!({:mongod => node[:mongodb][:port].to_i - 1, :shard => node[:mongodb][:port], :configdb => 27019}) if new_resource.sharded
+  ports = {:mongod => new_resource.port}
+  ports.merge!({:mongod => new_resource.port - 1, :shard => new_resource.port, :configdb => new_resource.port + 2}) if new_resource.sharded
   
   options = %w(journal)
   options << "shardsvr" if new_resource.sharded
@@ -40,7 +40,7 @@ action :create do
   config        = "#{node[:mongodb][:config_dir]}/mongodb_#{new_resource.name}.conf"
   instance      = new_resource.name
   is_sharded    = new_resource.sharded
-  run_configsvr = new_resource.config_servers.find {|s| s.include?(node[:fqdn]) }
+  run_configsvr = new_resource.config_server
   configsvrs    = new_resource.config_servers.join(',')
   
   # Create bluepill config
