@@ -6,6 +6,7 @@ Installs and configures 1-n mongo instances for each node.
 
 Depend on this cookbook within your cookbook and create instances of mongod's in your recipes via the LWRP:
 
+```
 mongod_instance 'instance_name' do
   name 'instance_name' (optional)
   port 'instance_port'
@@ -15,6 +16,7 @@ mongod_instance 'instance_name' do
   config_servers Array|false
   additional_settings 'extra flags to pass mongod option line'
 end
+```
 
 For extra points, use the data-bag driven databases::mongodb recipe to create 
          
